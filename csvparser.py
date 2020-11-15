@@ -1,5 +1,5 @@
 from testcsv import TestCsvs
-import os
+import os, json
 
 class CsvParser():
     def __init__(self, csv_file, seperator):
@@ -16,19 +16,20 @@ class CsvParser():
         self.headers = self.__getHeaders()
         self.data = self.__getData()
         self.dataDict = self.__convertDataToDict()
+        self.json = self.__convertDataDictToJson()
         
 
-    def __stripArray(self, inputArray):
+    def __stripArray(self, inputList):
         """Strip the array of stringtags (' or ").
 
         Args:
-            inputArray (List): Array of strings with strings that still have stringtags.
+            inputList (List): Array of strings with strings that still have stringtags.
 
         Returns:
             [List]: strings stripped of stringtags (' or ").
         """
-        arr = []
-        for i in inputArray:
+        li = []
+        for i in inputList:
             if i.startswith("\"") and i.endswith("\""):
                 i = i.strip("\"")
             elif i.startswith("\'") and i.endswith("\'"):
@@ -36,7 +37,7 @@ class CsvParser():
             if "\n" in i:
                 i = i.strip("\n")
             arr.append(i)
-        return arr
+        return li
 
     def __getHeaders(self):
         """Gets all the headers from the given csv files.
@@ -66,6 +67,7 @@ class CsvParser():
                     data.append(stripped_data)
         return data
 
+
     def __convertDataToDict(self):
         """Converts all entries to dictionaries with the headers as keys.
 
@@ -83,8 +85,15 @@ class CsvParser():
                     i2 += 1
                 lineobjects[i] = lineobject
                 i += 1
-
         return lineobjects
+    def __convertDataDictToJson(self):
+        """Dump the data dictionary to json
+
+        Returns:
+            [List]: json format of self.dataDict
+        """
+        jsonData = json.dumps(self.dataDict)
+        return jsonData
 
 
 if __name__ == '__main__':
@@ -92,12 +101,16 @@ if __name__ == '__main__':
     myTestCsvs = TestCsvs(testfolder)
 
     
-    for csv in myTestCsvs.csvList:
-        try:
-            parsed = CsvParser(os.path.join(testfolder, csv), ",")
-            print(f"\n{csv}")
-            print(f"\n{parsed.dataDict}")
-        except ValueError as e:
-            print(f"Failed to parse {csv}, \n{e}")
-        except:
-            print(f"Failed to parse {csv}, error unknown")
+    # for csv in myTestCsvs.csvList:
+    #     try:
+    #         parsed = CsvParser(os.path.join(testfolder, csv), ",")
+    #         print(f"\n{csv}")
+    #         print(f"\n{parsed.dataDict}")
+    #     except ValueError as e:
+    #         print(f"Failed to parse {csv}, \n{e}")
+    #     except:
+    #         print(f"Failed to parse {csv}, error unknown")
+
+    parsedCsv = CsvParser(myTestCsvs.getRandomCsv(), ",")
+    print(parsedCsv.json)
+    
