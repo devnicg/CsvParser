@@ -125,4 +125,5 @@ dmypy.json
 .pyre/
 
 # Custom files
-.DS_Store
+test.txt
+.vscode/settings.json
