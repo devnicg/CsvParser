@@ -11,16 +11,12 @@ class TestCsvs():
     
     def importFilesToCsvList(self):
         try:
-            # os.walk() retrieves root, dirs, files of the given path.
+            # os.walk() retrieves the 3-tuple root, dirs, files of the given path.
             for root, dirs, files in os.walk(self.folder):
                 # append all files in the test csv folder to the csv list.
-                if root:
-                    continue
-                for dir in dirs:
-                    continue
-                for filename in files:
-                    if filename.endswith('.csv'):
-                        self.csvList.append(filename)
+                for f in files:
+                    if f.endswith('.csv'):
+                        self.csvList.append(f)
                     else:
                         continue
             return
