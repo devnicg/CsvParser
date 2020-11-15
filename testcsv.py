@@ -15,7 +15,10 @@ class TestCsvs():
             for root, dirs, files in os.walk(self.folder):
                 # append all files in the test csv folder to the csv list.
                 for filename in files:
-                    self.csvList.append(filename)
+                    if filename.endswith('.csv'):
+                        self.csvList.append(filename)
+                    else:
+                        continue
             return
         except:
             return 'An error has occurred retreiving test csv files.'
