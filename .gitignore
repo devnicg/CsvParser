@@ -128,3 +128,4 @@ dmypy.json
 test.txt
 .vscode/settings.json
 test.json
+CsvParser.code-workspace
