@@ -22,5 +22,4 @@ class TestCsvs():
 
     def getRandomCsv(self):
         randomcsv = self.csvList[random.randint(-1, len(self.csvList))]
-        # return the absolute path of a csv.
         return os.path.join(self.folder, randomcsv)
