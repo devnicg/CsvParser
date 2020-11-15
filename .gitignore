@@ -127,3 +127,4 @@ dmypy.json
 # Custom files
 test.txt
 .vscode/settings.json
+test.json
