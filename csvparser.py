@@ -1,4 +1,5 @@
-
+from testcsv import TestCsvs
+import os
 
 class CsvParser():
     def __init__(self, csv_file, seperator):
@@ -9,6 +10,8 @@ class CsvParser():
             sep (String): Seperator used in given CSV file.
         """
         self.csv_file = csv_file
+        if not self.csv_file.endswith(".csv"):
+            raise ValueError("wrong filetype")
         self.seperator = seperator
         self.headers = self.__getHeaders()
         self.data = self.__getData()
@@ -85,22 +88,16 @@ class CsvParser():
 
 
 if __name__ == '__main__':
-    from testcsv import TestCsvs
-    import os
     testfolder = '2018-census-totals-by-topic-national-highlights-csv'
     myTestCsvs = TestCsvs(testfolder)
-    mycsv_list = myTestCsvs.csvList
-
-    def log(toLog):
-        print("\n")
-        print(toLog)
 
     
-    for csv in mycsv_list:
+    for csv in myTestCsvs.csvList:
         try:
-            if csv.endswith(".csv"):
-                parsed = CsvParser(os.path.join(testfolder, csv), ",")
-                log(csv)
-                log(parsed.dataDict)
+            parsed = CsvParser(os.path.join(testfolder, csv), ",")
+            print(f"\n{csv}")
+            print(f"\n{parsed.dataDict}")
+        except ValueError as e:
+            print(f"Failed to parse {csv}, \n{e}")
         except:
-            print(f"Failed to parse {csv}")
+            print(f"Failed to parse {csv}, error unknown")
