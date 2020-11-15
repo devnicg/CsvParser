@@ -1,5 +1,5 @@
 from testcsv import TestCsvs
-import os, json
+import os, json, sqlite3, sys
 
 class CsvParser():
     def __init__(self, csv_file, seperator):
@@ -17,6 +17,7 @@ class CsvParser():
         self.data = self.__getData()
         self.dataDict = self.__convertDataToDict()
         self.json = self.__convertDataDictToJson()
+        self.tablesql = self.__generateSqlTableQuery()
         
 
     def __stripArray(self, inputList):
@@ -30,12 +31,12 @@ class CsvParser():
         """
         li = []
         for i in inputList:
+            if "\n" in i:
+                i = i.strip("\n")
             if i.startswith("\"") and i.endswith("\""):
                 i = i.strip("\"")
             elif i.startswith("\'") and i.endswith("\'"):
-                i = i.strip("\'")
-            if "\n" in i:
-                i = i.strip("\n")
+                i = i.rstrip("\'").lstrip("\'")
             li.append(i)
         return li
 
@@ -92,25 +93,40 @@ class CsvParser():
         Returns:
             [List]: json format of self.dataDict
         """
-        jsonData = json.dumps(self.dataDict)
+        # indent=4 and sort_keys=True returns a nicely formated json
+        jsonData = json.dumps(self.dataDict, indent=4, sort_keys=True)
         return jsonData
-
+    
+    def __generateSqlTableQuery(self):
+        tablecolumns = "("
+        for header in self.headers:
+            if not header == self.headers[-1]:
+                tablecolumns += f"{header}, "
+            else:
+                tablecolumns += f"{header})"
+        return tablecolumns
+        
 
 if __name__ == '__main__':
     testfolder = '2018-census-totals-by-topic-national-highlights-csv'
     myTestCsvs = TestCsvs(testfolder)
 
+    for csv in myTestCsvs.csvList:
+        try:
+            parsed = CsvParser(os.path.join(testfolder, csv), ",")
+            print(f"\n{csv}")
+            print(f"\n{parsed.tablesql}")
+            
+            # with open(os.path.join(testfolder, csv + ".json"), "w") as f:
+            #     f.write(parsed.json)
+            #     f.close()
+        except ValueError as e:
+            print(f"Failed to parse {csv}, \n{e}")
+        except:
+            print(f"Failed to parse {csv}, error unknown"), sys.exc_info()[0]
+            raise
     
-    # for csv in myTestCsvs.csvList:
-    #     try:
-    #         parsed = CsvParser(os.path.join(testfolder, csv), ",")
-    #         print(f"\n{csv}")
-    #         print(f"\n{parsed.dataDict}")
-    #     except ValueError as e:
-    #         print(f"Failed to parse {csv}, \n{e}")
-    #     except:
-    #         print(f"Failed to parse {csv}, error unknown")
-
-    parsedCsv = CsvParser(myTestCsvs.getRandomCsv(), ",")
-    print(parsedCsv.json)
     
+    testparse = CsvParser(myTestCsvs.getRandomCsv(), ",")
+    
+    print(testparse.tablesql)
