@@ -36,7 +36,7 @@ class CsvParser():
                 i = i.strip("\'")
             if "\n" in i:
                 i = i.strip("\n")
-            arr.append(i)
+            li.append(i)
         return li
 
     def __getHeaders(self):
