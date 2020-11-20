@@ -1,6 +1,7 @@
 from testcsv import TestCsvs
 import os, json, sqlite3, sys
 
+
 class CsvParser():
     def __init__(self, csv_file, seperator):
         """Initialize the CsvParser.
@@ -10,14 +11,16 @@ class CsvParser():
             sep (String): Seperator used in given CSV file.
         """
         self.csv_file = csv_file
-        if not self.csv_file.endswith(".csv"):
+        if not self.csv_file.endswith('.csv'):
             raise ValueError("wrong filetype")
         self.seperator = seperator
         self.headers = self.__getHeaders()
         self.data = self.__getData()
         self.dataDict = self.__convertDataToDict()
         self.json = self.__convertDataDictToJson()
-        self.tablesql = self.__generateSqlTableQuery()
+        self.database_name = self.csv_file.replace('.csv', '.db')
+        self.table_name = self.csv_file.rstrip('.csv')
+        self.tablekeys = self.__generateSqlTableQuery()
         
 
     def __stripArray(self, inputList):
@@ -87,6 +90,7 @@ class CsvParser():
                 lineobjects[i] = lineobject
                 i += 1
         return lineobjects
+
     def __convertDataDictToJson(self):
         """Dump the data dictionary to json
 
@@ -104,8 +108,22 @@ class CsvParser():
                 tablecolumns += f"{header}, "
             else:
                 tablecolumns += f"{header})"
-        return tablecolumns
-        
+        return str(tablecolumns)
+
+    def createDatabase(self):
+        try:
+            con = sqlite3.connect(self.database_name)
+            cur = con.cursor()
+            q = f"CREATE TABLE {self.table_name} IF NOT EXISTS values
+            {self.tablekeys}"
+            cur.exectute(q)
+        except sqlite3.Error as e:
+            return "Could not create database"
+        finally:
+            if con:
+                con.commit()
+                con.close()
+
 
 if __name__ == '__main__':
     testfolder = '2018-census-totals-by-topic-national-highlights-csv'
