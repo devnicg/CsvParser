@@ -1,6 +1,7 @@
 from testcsv import TestCsvs
 import os, json, sqlite3, sys
 
+os.chdir(sys.path[0])
 
 class CsvParser():
     def __init__(self, csv_file, seperator):
@@ -21,7 +22,7 @@ class CsvParser():
         self.database_name = self.csv_file.replace('.csv', '.db')
         self.table_name = self.csv_file.rstrip('.csv')
         self.tablekeys = self.__generateSqlTableQuery()
-        
+
 
     def __stripArray(self, inputList):
         """Strip the array of stringtags (' or ").
@@ -53,7 +54,7 @@ class CsvParser():
             headers = c.readline().split(self.seperator)
             stripped_headers = self.__stripArray(headers)
             return stripped_headers
-    
+
     def __getData(self):
         """Gets all the data from the given csv file.
 
@@ -100,7 +101,7 @@ class CsvParser():
         # indent=4 and sort_keys=True returns a nicely formated json
         jsonData = json.dumps(self.dataDict, indent=4, sort_keys=True)
         return jsonData
-    
+
     def __generateSqlTableQuery(self):
         tablecolumns = "("
         for header in self.headers:
@@ -110,41 +111,52 @@ class CsvParser():
                 tablecolumns += f"{header})"
         return str(tablecolumns)
 
+
     def createDatabase(self):
         try:
             con = sqlite3.connect(self.database_name)
             cur = con.cursor()
-            q = f"CREATE TABLE {self.table_name} IF NOT EXISTS values
-            {self.tablekeys}"
-            cur.exectute(q)
+            q = f"CREATE TABLE IF NOT EXISTS csvfile {self.tablekeys}"
+            cur.execute(q)
+            con.commit()
         except sqlite3.Error as e:
-            return "Could not create database"
+            return "Could not create database", e
         finally:
             if con:
-                con.commit()
                 con.close()
 
 
-if __name__ == '__main__':
+    #dr = csv.DictReader(file, delimiter=";")
+    #to_db = [(i['ObjectNummer'], i['Type'], i['Indienst'], i['Voornaam'], i['Naam'], i['Status'], i['Firma'], i['Afdeling'], i['Serienr'], i['FactuurDatum']) for i in dr]
+
+    #def insertDataIntoDatabase(self):
+    #    try:
+    #        con = sqlite3.connect(self.database_name)
+    #        cur = sqlite3.cursor()
+    #        for d in
+
+    def convertJsonToDatabase(self):
+        try:
+            database_name = self.database_name.rstrip(".db") + "_json.db"
+            con = sqlite3.connect(database_name)
+            cur = con.cursor()
+            q = "CREATE TABLE IF NOT EXISTS csvtojson (id INTEGER PRIMARY KEY AUTOINCREMENT, jsondata json)"
+            cur.execute(q)
+            con.commit()
+            qin = [(x, self.dataDict[x]) for x in self.dataDict]
+            cur.executemany("INSERT INTO csvtojson values (?,?)", qin)
+            con.commit()
+        except sqlite3.Error as e:
+            return f"Failed to create json database:\n {e}"
+        else:
+            if con:
+                con.close()
+                return "Succesfully created json database, inserted json into database and closed database connection."
+
+if __name__ == "__main__":
     testfolder = '2018-census-totals-by-topic-national-highlights-csv'
     myTestCsvs = TestCsvs(testfolder)
 
-    for csv in myTestCsvs.csvList:
-        try:
-            parsed = CsvParser(os.path.join(testfolder, csv), ",")
-            print(f"\n{csv}")
-            print(f"\n{parsed.tablesql}")
-            
-            # with open(os.path.join(testfolder, csv + ".json"), "w") as f:
-            #     f.write(parsed.json)
-            #     f.close()
-        except ValueError as e:
-            print(f"Failed to parse {csv}, \n{e}")
-        except:
-            print(f"Failed to parse {csv}, error unknown"), sys.exc_info()[0]
-            raise
-    
-    
     testparse = CsvParser(myTestCsvs.getRandomCsv(), ",")
-    
-    print(testparse.tablesql)
+
+    print(testparse.convertJsonToDatabase())
