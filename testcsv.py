@@ -8,7 +8,7 @@ class TestCsvs():
         self.csvList = []
         self.importFilesToCsvList()
 
-    
+
     def importFilesToCsvList(self):
         try:
             # os.walk() retrieves the 3-tuple root, dirs, files of the given path.
@@ -24,5 +24,5 @@ class TestCsvs():
             return 'An error has occurred retreiving test csv files.'
 
     def getRandomCsv(self):
-        randomcsv = self.csvList[random.randint(-1, len(self.csvList))]
+        randomcsv = self.csvList[random.randint(-1, len(self.csvList)-1)]
         return os.path.join(self.folder, randomcsv)
