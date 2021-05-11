@@ -126,9 +126,6 @@ class CsvParser():
                 con.close()
 
 
-    #dr = csv.DictReader(file, delimiter=";")
-    #to_db = [(i['ObjectNummer'], i['Type'], i['Indienst'], i['Voornaam'], i['Naam'], i['Status'], i['Firma'], i['Afdeling'], i['Serienr'], i['FactuurDatum']) for i in dr]
-
     #def insertDataIntoDatabase(self):
     #    try:
     #        con = sqlite3.connect(self.database_name)
